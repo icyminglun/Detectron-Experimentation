@@ -130,14 +130,14 @@ def main(args):
 
     for i, im_name in enumerate(im_list):                                                        # Iterate through the list of images. (in folder)
 
-        out_name = os.path.join(                                                                 # Joins the components together    
+        out_name = os.path.join(                                                                 # Joins the components together ...
             args.output_dir, '{}'.format(os.path.basename(im_name) + '.' + args.output_ext)      # To create a full path 
         )
         logger.info('Processing {} -> {}'.format(im_name, out_name))
         im = cv2.imread(im_name)                                                                 # Reads each image using the given file name.
         timers = defaultdict(Timer)                                                              # Timers -> used to track time span per inference.
         t = time.time()                                                                          # t -> retrieves the time value (duration)
-        with c2_utils.NamedCudaScope(0):                                                         # ???
+        with c2_utils.NamedCudaScope(0):                                                         # ???  --> CudaScope
             cls_boxes, cls_segms, cls_keyps = infer_engine.im_detect_all(                                   
                 model, im, None, timers=timers                                                   # im -> image , None -> 'guideline' (box proposal) , timers -> (duration used to complete inferencing)
             )

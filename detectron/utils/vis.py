@@ -263,6 +263,8 @@ def vis_one_image(
     if (boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh) and not out_when_no_box:   # ???
         return
 
+
+                                                                                                      # < SEGMENTATION PART? >
     dataset_keypoints, _ = keypoint_utils.get_keypoints()                                             #  """Get the COCO keypoints and their left/right flip coorespondence map."""
                                                                                                       # Keypoints are not available in the COCO json for the test split, so we
                                                                                                       # provide them here.
@@ -276,16 +278,21 @@ def vis_one_image(
     cmap = plt.get_cmap('rainbow')                                                                    # color maps the segmentation mask of objects.
     colors = [cmap(i) for i in np.linspace(0, 1, len(kp_lines) + 2)]                                  # Iterate (for loop) -> colors for each body part? 
 
-    fig = plt.figure(frameon=False)                                                                   # Creates a Figure 
-    fig.set_size_inches(im.shape[1] / dpi, im.shape[0] / dpi)                                         
-    ax = plt.Axes(fig, [0., 0., 1., 1.])
-    ax.axis('off')
-    fig.add_axes(ax)
-    ax.imshow(im)
+    fig = plt.figure(frameon=False)                                                                   # Creates a Figure -> presumably for the segmentation / keypoints
+    fig.set_size_inches(im.shape[1] / dpi, im.shape[0] / dpi)                                         # <set_size_inches> - function under matplotlib.pyplot.figure -> Set figure size in inches (1 inch = 2.54cm)  
+                                                                                                      # im.shape -> 
+    ax = plt.Axes(fig, [0., 0., 1., 1.])                                                              # <plt.axes> - Add an axes to the current figure and make it the current axes
+    ax.axis('off')                                                                                    # <ax.axis> - Set Axis Properties | <ax.axis('off')> - Toggle axis lines and labels off                                                   
+    fig.add_axes(ax)                                                                                  # <fig.add_axe(axes)> -> [matplotlib.pyplot.figure.add_axes] -> Adds the axes defined earlier to the figure. (ax)
+    ax.imshow(im)                                                                                     # <ax.imshow(im)> -> [matplotlib.pyplot.Axes.imshow(im)] -> Display an image on the axes. 
 
-    if boxes is None:
-        sorted_inds = [] # avoid crash when 'boxes' is None
-    else:
+
+
+
+
+    if boxes is None:                                                                                 # if boxes does not exist?                                                                                                                                            
+        sorted_inds = [] # avoid crash when 'boxes' is None                                             
+    else:           
         # Display in largest to smallest order to reduce occlusion
         areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
         sorted_inds = np.argsort(-areas)
