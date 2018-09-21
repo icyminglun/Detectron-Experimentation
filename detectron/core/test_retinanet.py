@@ -66,10 +66,10 @@ def _create_cell_anchors():
 
 def im_detect_bbox(model, im, timers=None):
     """Generate RetinaNet detections on a single image."""
-    if timers is None:
+    if timers is None:                                      
         timers = defaultdict(Timer)
     # Although anchors are input independent and could be precomputed,
-    # recomputing them per image only brings a small overhead
+    # recomputing them per image only brings a small overhead   
     anchors = _create_cell_anchors()
     timers['im_detect_bbox'].tic()
     k_max, k_min = cfg.FPN.RPN_MAX_LEVEL, cfg.FPN.RPN_MIN_LEVEL

@@ -28,7 +28,7 @@ from collections import defaultdict
 import argparse
 import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 import glob
-import logging
+import logging 
 import os
 import sys
 import time
@@ -171,7 +171,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
+   # workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
     setup_logging(__name__)
     args = parse_args()
     main(args)

@@ -285,55 +285,65 @@ def vis_one_image(
     ax.axis('off')                                                                                    # <ax.axis> - Set Axis Properties | <ax.axis('off')> - Toggle axis lines and labels off                                                   
     fig.add_axes(ax)                                                                                  # <fig.add_axe(axes)> -> [matplotlib.pyplot.figure.add_axes] -> Adds the axes defined earlier to the figure. (ax)
     ax.imshow(im)                                                                                     # <ax.imshow(im)> -> [matplotlib.pyplot.Axes.imshow(im)] -> Display an image on the axes. 
+    
+    #print(boxes) 
+    
 
+                                                                                                      # < BOUNDING BOXES > 
 
-
-
-
+                                                                                                      # [ This if loop iterates through the list of bounding boxes and calculates the area of each box, then finally sorting them with numpy.argsort
     if boxes is None:                                                                                 # if boxes does not exist?                                                                                                                                            
-        sorted_inds = [] # avoid crash when 'boxes' is None                                             
+        sorted_inds = [] # avoid crash when 'boxes' is None                                                                            
     else:           
-        # Display in largest to smallest order to reduce occlusion
-        areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
-        sorted_inds = np.argsort(-areas)
+        # Display in largest to smallest order to reduce occlusion  -> bounding boxes
+        areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])                             # Array that contains coordinates of the given area?   (Calculates Width * Length)
+        sorted_inds = np.argsort(-areas)                                                               # <np.argsort> -> from the numpy library. Takes in 'area' arguement (an array) -> Performs indirect sort along the given axis. 
+     
 
-    mask_color_id = 0
-    for i in sorted_inds:
-        bbox = boxes[i, :4]
-        score = boxes[i, -1]
-        if score < thresh:
-            continue
 
+    
+                                                                                                    
+    mask_color_id = 0                                                                                                          
+    for i in sorted_inds:                                                                             # Iterates through the sorted list of bounding box areas
+        bbox = boxes[i, :4]                                                                           # bbox stores the new sorted bounding boxes (with registered number) -> array? 
+        score = boxes[i, -1]                                                                          # score stores the confidence score of detection 
+        if score < thresh:                                                                            # ! thresh?  (CONDITION)   (Threshold? -> Confidence Score must be > 0.9 as stated in params)
+            continue                                                                                  # Continues with the next cycle of the nearest enclosing loop
+       
         # show box (off by default)
-        ax.add_patch(
-            plt.Rectangle((bbox[0], bbox[1]),
-                          bbox[2] - bbox[0],
+        ax.add_patch(                                                                                 # <ax.add_patch> -> plt.Axes.add_patch -> matplot.pyplot.Axes.add_patch : Adds a patch p to the list of axes patches. Returns the patch
+            plt.Rectangle((bbox[0], bbox[1]),                                                         # <plt.Rectangle> -> matplot.pyplot.Rectangle -> Draw a rectangle with lower left at xy = (x, y) with specified width, height and rotation angle.                      
+                          bbox[2] - bbox[0],                                                          # bbox[0], bbox[1]  -> xy axis 
                           bbox[3] - bbox[1],
-                          fill=False, edgecolor='g',
-                          linewidth=0.5, alpha=box_alpha))
+                          fill=False, edgecolor='g',                                                  # fill = ?  , edgecolor = green (color of bounding boxes) -> documentation 
+                          linewidth=0.5, alpha=box_alpha))                                            # linewidth = ? , alpha = box_alpha ? -> documentation 
 
-        if show_class:
-            ax.text(
-                bbox[0], bbox[1] - 2,
-                get_class_string(classes[i], score, dataset),
-                fontsize=3,
-                family='serif',
-                bbox=dict(
-                    facecolor='g', alpha=0.4, pad=0, edgecolor='none'),
-                color='white')
+
+        #print(bbox)                                                                                # Coordinate Points of Bounding Boxes -> (4 coordinates)                
+                                                                                                      # < ANNOTATING AXES > 
+        if show_class:                                                                                # ?                  
+            ax.text(                                                                                  # <ax.text> -> plt.text -> matplot.pyplot.text : Adds text to the axes 
+                # PARAMETERS
+                bbox[0], bbox[1] - 2,                                                                 # 1. Why -2 ? 
+                get_class_string(classes[i], score, dataset),                                         # 2. !!! <get_class_string> -> vis.py : connection with dummy_datasets
+                fontsize=3,                                                                           # 3. Setting the font size 
+                family='serif',                                                                       # 4. Setting the font type/family
+                bbox=dict(                                                                            # 5. Annotating Axes : 
+                    facecolor='g', alpha=0.4, pad=0, edgecolor='none'),                               # [Parameters] : 1. facecolor -> Face Color , 2. 
+                color='white')                          
 
         # show mask
-        if segms is not None and len(segms) > i:
-            img = np.ones(im.shape)
-            color_mask = color_list[mask_color_id % len(color_list), 0:3]
-            mask_color_id += 1
-
-            w_ratio = .4
-            for c in range(3):
-                color_mask[c] = color_mask[c] * (1 - w_ratio) + w_ratio
-            for c in range(3):
+        if segms is not None and len(segms) > i:                                                      # if segmentation is not 'None' value (aka not empty) & List of segmentation is not lesser than i (loop?)
+            img = np.ones(im.shape)                                                                   # <np.ones> -> numpy.ones : return a new array of given shape and type, filled with ones (in a form of 1s?)
+            color_mask = color_list[mask_color_id % len(color_list), 0:3]                             # Sets color of the segmentation mask 
+            mask_color_id += 1                                                                        
+            
+            w_ratio = .4                                                              
+            for c in range(3):                                                                        # Iterates the loop                                                                 
+                color_mask[c] = color_mask[c] * (1 - w_ratio) + w_ratio                               # Gradually Changes the colors of each mask? 
+            for c in range(3):                                                                      
                 img[:, :, c] = color_mask[c]
-            e = masks[:, :, i]
+            e = masks[:, :, i]                                                                        
 
             _, contour, hier = cv2.findContours(
                 e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
@@ -345,6 +355,8 @@ def vis_one_image(
                     edgecolor='w', linewidth=1.2,
                     alpha=0.5)
                 ax.add_patch(polygon)
+
+        print(polygon)
 
         # show keypoints
         if keypoints is not None and len(keypoints) > i:
@@ -399,3 +411,51 @@ def vis_one_image(
     output_name = os.path.basename(im_name) + '.' + ext
     fig.savefig(os.path.join(output_dir, '{}'.format(output_name)), dpi=dpi)
     plt.close('all')
+
+
+# Additional Function (Jerome)
+def get_annotation(im, boxes, segms=None, thresh=0.9, dataset=None):
+    if isinstance(boxes, list):
+        boxes, segms, _, classes = convert_from_cls_format(
+            boxes, segms, None)
+    if boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh:
+        return
+    if segms is not None and len(segms) > 0:
+        masks = mask_util.decode(segms)
+
+    areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
+    sorted_inds = np.argsort(-areas)
+
+    color_list = colormap(rgb=True) / 255
+
+    mask_color_id = 0
+    for i in sorted_inds:
+        bbox = boxes[i, :4]
+        score = boxes[i, -1]
+        if score < thresh:
+            continue
+
+        class_string = get_class_string(classes[i], score, dataset)
+
+        # show mask
+        if segms is not None and len(segms) > i:
+            img = np.ones(im.shape)
+            color_mask = color_list[mask_color_id % len(color_list), 0:3]
+            mask_color_id += 1
+
+            w_ratio = .4
+            for c in range(3):
+                color_mask[c] = color_mask[c] * (1 - w_ratio) + w_ratio
+            for c in range(3):
+                img[:, :, c] = color_mask[c]
+            e = masks[:, :, i]
+
+            _, contour, _ = cv2.findContours(
+                e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+            polygons = []
+            for c in contour:
+                polygons.append(c.reshape((-1, 2)))
+
+        print(class_string)
+        print(bbox)
+        print(polygons)

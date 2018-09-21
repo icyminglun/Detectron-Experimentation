@@ -50,12 +50,12 @@ logger = logging.getLogger(__name__)
 
 
 def im_detect_all(model, im, box_proposals, timers=None):
-    if timers is None:
-        timers = defaultdict(Timer)
+    if timers is None:                                                                         # if timers has no value ...
+        timers = defaultdict(Timer)                                                            # set a defaultdict timer. 
 
     # Handle RetinaNet testing separately for now
-    if cfg.RETINANET.RETINANET_ON:
-        cls_boxes = test_retinanet.im_detect_bbox(model, im, timers)
+    if cfg.RETINANET.RETINANET_ON:                                                             # if cfg.RETINANET.RETINANET_ON = false ... (not using Retinanet) 
+        cls_boxes = test_retinanet.im_detect_bbox(model, im, timers)                           #    <im_detect_bbox> -> from test_retinanet : 
         return cls_boxes, None, None
 
     timers['im_detect_bbox'].tic()
@@ -747,7 +747,7 @@ def combine_heatmaps_size_dep(hms_ts, ds_ts, us_ts, boxes, heur_f):
 
 
 def box_results_with_nms_and_limit(scores, boxes):
-    """Returns bounding-box detection results by thresholding on scores and
+    """Returns bounding-box detection results by thresholding on scores and                                                 
     applying non-maximum suppression (NMS).
 
     `boxes` has shape (#detections, 4 * #classes), where each row represents
@@ -760,7 +760,7 @@ def box_results_with_nms_and_limit(scores, boxes):
     dataset (including the background class). `scores[i, j]`` corresponds to the
     box at `boxes[i, j * 4:(j + 1) * 4]`.
     """
-    num_classes = cfg.MODEL.NUM_CLASSES
+    num_classes = cfg.MODEL.NUM_CLASSES                                                   #
     cls_boxes = [[] for _ in range(num_classes)]
     # Apply threshold on detection probabilities and apply NMS
     # Skip j = 0, because it's the background class
